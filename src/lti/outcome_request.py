@@ -84,9 +84,9 @@ class OutcomeRequest(object):
                 error_msg = ('Dictionary result_data can only have one entry. '
                              '{0} entries were found.'.format(len(result_data)))
                 raise InvalidLTIConfigError(error_msg)
-            elif 'text' not in result_data and 'url' not in result_data:
+            elif result_data.keys()[0] not in ['text', 'url', 'lti_launch_url']:
                 error_msg = ('Dictionary result_data can only have the key '
-                             '"text" or the key "url".')
+                             '"text", "url", or "lti_launch_url".')
                 raise InvalidLTIConfigError(error_msg)
             else:
                 return self.post_outcome_request()
@@ -230,5 +230,8 @@ class OutcomeRequest(object):
             elif 'url' in self.result_data:
                 resultDataURL = etree.SubElement(resultData, 'url')
                 resultDataURL.text = self.result_data['url']
+            elif 'lti_launch_url' in self.result_data:
+                resultDataURL = etree.SubElement(resultData, 'ltiLaunchUrl')
+                resultDataURL.text = self.result_data['lti_launch_url']
 
         return etree.tostring(root, xml_declaration=True, encoding='utf-8')
