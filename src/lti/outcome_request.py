@@ -22,7 +22,8 @@ VALID_ATTRIBUTES = [
     'lis_result_sourcedid',
     'consumer_key',
     'consumer_secret',
-    'post_request'
+    'post_request',
+    'submitted_at'
 ]
 
 
@@ -64,7 +65,7 @@ class OutcomeRequest(object):
         request.process_xml(post_request.body)
         return request
 
-    def post_replace_result(self, score, result_data=None):
+    def post_replace_result(self, score, result_data=None, result_metadata=None):
         '''
         POSTs the given score to the Tool Consumer with a replaceResult.
 
@@ -79,6 +80,8 @@ class OutcomeRequest(object):
         self.operation = REPLACE_REQUEST
         self.score = score
         self.result_data = result_data
+        if result_metadata:
+            self.submitted_at = result_metadata.get('submitted_at')
         if result_data is not None:
             if len(result_data) > 1:
                 error_msg = ('Dictionary result_data can only have one entry. '
@@ -233,5 +236,10 @@ class OutcomeRequest(object):
             elif 'lti_launch_url' in self.result_data:
                 resultDataURL = etree.SubElement(resultData, 'ltiLaunchUrl')
                 resultDataURL.text = self.result_data['lti_launch_url']
+        
+        if self.submitted_at:
+            submission_details = etree.SubElement(request, 'submissionDetails')
+            submitted_at = etree.SubElement(submission_details, 'submittedAt')
+            submitted_at.text = self.submitted_at
 
         return etree.tostring(root, xml_declaration=True, encoding='utf-8')
